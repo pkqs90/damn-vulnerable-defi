@@ -14,6 +14,8 @@ import {
     NewDelayAboveMax
 } from "./ClimberErrors.sol";
 
+import "hardhat/console.sol";
+
 /**
  * @title ClimberTimelock
  * @author Damn Vulnerable DeFi (https://damnvulnerabledefi.xyz)
