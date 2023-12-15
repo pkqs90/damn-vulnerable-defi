@@ -49,7 +49,7 @@ contract ClimberAttacker {
     }
 }
 
-// Upgrade original contract to this one.
+// Upgrade original contract to this one so we can sweep the funds.
 contract ClimberVaultAttacker is Initializable, OwnableUpgradeable, UUPSUpgradeable {
     uint256 private _lastWithdrawalTimestamp;
     address private _sweeper;

