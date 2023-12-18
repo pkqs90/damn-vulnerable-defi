@@ -3,6 +3,7 @@ pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
+import "hardhat/console.sol";
 
 /**
  * @title AuthorizedExecutor
@@ -53,6 +54,8 @@ abstract contract AuthorizedExecutor is ReentrancyGuard {
         assembly {
             selector := calldataload(calldataOffset)
         }
+        console.logBytes4(selector);
+        console.logBytes(actionData);
 
         if (!permissions[getActionId(selector, msg.sender, target)]) {
             revert NotAllowed();
